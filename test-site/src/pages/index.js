@@ -1,21 +1,53 @@
-import React from "react"
-import { Link } from "gatsby"
+import React from 'react'
+import { Link, graphql } from 'gatsby'
 
-import Layout from "../components/layout"
-import Image from "../components/image"
-import SEO from "../components/seo"
+import Layout from '../components/layout'
 
-const IndexPage = () => (
+/*  THIS IS THE FUNCTION TO EXTRACT DATA
+ *  Function to create list of <h1> elements with Post title
+ *  @param {*} data
+*/
+
+function getPosts (data) {
+  let posts = []
+  let postsList = data.allMarkdownRemark.edges
+  postsList.forEach(element => {
+    let postData = element.node.frontmatter
+
+    posts.push(
+      <Link to={postData.slug}> <h1>{postData.title}</h1></Link>
+    )
+  })
+
+  return posts
+}
+
+// This is a stateless react component
+// The data passed into the component is the result
+// of the GraphQL Query below:
+
+const IndexPage = ({ data }) => (
   <Layout>
-    <SEO title="Home" />
-    <h1>Hi people</h1>
-    <p>Welcome to your new Gatsby site.</p>
-    <p>Now go build something great.</p>
-    <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
-      <Image />
-    </div>
-    <Link to="/page-2/">Go to page 2</Link>
+    { getPosts(data) }
   </Layout>
 )
 
 export default IndexPage
+
+// THis is the aforementioned GraphQL query
+export const postsQuery = graphql`
+query postsQuery {
+  allMarkdownRemark(
+    sort: { fields: [frontmatter___date], order: DESC }
+  ) {
+      edges {
+        node{
+          frontmatter {
+            slug
+            title
+          }
+        }
+      }
+    }
+  }
+`
